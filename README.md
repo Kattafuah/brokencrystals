@@ -4,24 +4,22 @@ A demo application "brokencrystals" is used for this capstone project. BrokenCry
 
 Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accesed via this link ``` <provide link> ```
 
-### Objective
+## Objective
 To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to automate the build, test, and deployment processes, incorporating security best practices throughout the development lifecycle.
 
-### Key Requirements
-Key Requirements:
+## Key Requirements
+**1.** Static Code Analysis: Integrate a Static Application Security Testing (SAST) tool (such as SonarQube or Snyk) into the pipeline to analyze code for vulnerabilities.
 
-*** 1. *** Static Code Analysis: Integrate a Static Application Security Testing (SAST) tool (such as SonarQube or Snyk) into the pipeline to analyze code for vulnerabilities.
+**2.** Secrets Management: Utilize a secrets management tool (like HashiCorp Vault or AWS Secrets Manager) to securely manage sensitive information and credentials.
 
-*** 2. *** Secrets Management: Utilize a secrets management tool (like HashiCorp Vault or AWS Secrets Manager) to securely manage sensitive information and credentials.
+**3.** Docker Image: Build and push the Docker image to any selected Docker registry (such as Amazon ECR or Docker Hub) following security best practices. Configure image scanning for the deployed Docker images to detect vulnerabilities.
 
-*** 3. *** Docker Image: Build and push the Docker image to any selected Docker registry (such as Amazon ECR or Docker Hub) following security best practices. Configure image scanning for the deployed Docker images to detect vulnerabilities.
+**4.** Deployment: Deploy the application to a Kubernetes cluster provisioned with Minikube or Kind. Use port forwarding to ensure that the application is publicly accessible.
 
-*** 4. *** Deployment: Deploy the application to a Kubernetes cluster provisioned with Minikube or Kind. Use port forwarding to ensure that the application is publicly accessible.
-
-*** 5. *** Dynamic Application Security Testing (DAST): Implement DAST tools (such as OWASP ZAP) into the pipeline to test for vulnerabilities after deployment.
+**5.** Dynamic Application Security Testing (DAST): Implement DAST tools (such as OWASP ZAP) into the pipeline to test for vulnerabilities after deployment.
 
 
-## Creating a Jenkins Pipeline for SonarQube Scanning
+## Static Code Analysis - Creating a Jenkins Pipeline for SonarQube Scanning
 
 **1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090, 9000 etc.
 
@@ -178,7 +176,7 @@ Now a connection has been created between the GitHub repository and the Jenkins 
 * Click on "Build Now" to trigger the pipeline
 
 
-You can check the progress of the build by clicking on the drop down shown below and selecting "Console Output"
+You can check the progress of the build by clicking on the drop down shown below and selecting "Console Output".
 
 ![alt text](consoleoutput.png)
 
@@ -191,6 +189,7 @@ Go to the SonarQube Server, Click on "Projects" and view the result of assessmen
 
 ![alt text](Sonarqubeoverview.png)
 
+Clearly there results show security, reliability, maintainability, duplications and security hostpots issue that need to be addressed.
 
 ### GitHub Webhook
 
@@ -213,6 +212,7 @@ You can automate the the build trigger by using a GitHub webhook:
 
 Now the pipeline will trigger automatically once there is a push to the repository on branch "stable"
 
+## Secret Management using AWS Secrets Manager
 
 
 

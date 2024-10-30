@@ -1,3 +1,25 @@
+## Creating a Jenkins Pipeline for SonarQube Scanning
+
+1.  Launch an amazon linux t2.large ec2 instance and assign ssm role
+
+2. Get into the terminal via ssm on the console
+
+3. Move to root user, make sure you are in the usr directory, hence run cd .. if you are in bin directory
+
+`sudo su`
+
+4. Run to download install.sh file to install docker
+
+`wget -O install.sh https://raw.GitHubusercontent.com/kattafuah/brokencrystals/refs/heads/stable/jenkins_SonarQube/install.sh`
+
+5. Add executable permission for install.sh file
+
+`chmod +x install.sh`
+
+
+
+
+
 ## Description
 
 Broken Crystals is a benchmark application that uses modern technologies and implements a set of common security vulnerabilities.

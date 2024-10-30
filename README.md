@@ -180,11 +180,12 @@ Now a connection has been created between the GitHub repository and the Jenkins 
 
 You can check the progress of the build by clicking on the drop down shown below and selecting "Console Output"
 
-![Screenshot (91)](https://github.com/user-attachments/assets/fb12171e-fc14-4301-bc54-c544f00fb4b6)
+![consoleoutput1](image.png)
 
 A successful build shows a green tick in a circle.
 
-![Screenshot (92)](https://github.com/user-attachments/assets/1c0348e8-0bd0-46ed-b9eb-a5ed18e10e81)
+![successfulconsoleoutput2](successfulconsoleoutput.png)
+
 
 Go to the SonarQube Server, Click on "Projects" and view the result of assessment as in the picture below:
 

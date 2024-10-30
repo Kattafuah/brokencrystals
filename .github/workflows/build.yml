@@ -35,12 +35,6 @@ jobs:
             sudo chmod +x /usr/local/bin/docker-compose
             docker-compose version
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Build the Docker images
         run: |
            sudo npm ci && npm run build 
@@ -55,9 +49,9 @@ jobs:
 
       - name: Tag Docker images
         run: |
-            docker tag brokencrystals_nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
-            docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
-            docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
+            docker tag brokencrystals_nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:nodejs-latest
+            docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:postgres-latest
+            docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:mailcatcher-latest
        
     #   docker push kattafuah/brokencrystals:tagname
 
@@ -69,9 +63,9 @@ jobs:
     
       - name: Push Docker images
         run: |
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
-          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:nodejs-latest
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:postgres-latest
+          docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:mailcatcher-latest
       
 
 #   deploy:

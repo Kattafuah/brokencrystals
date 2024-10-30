@@ -215,7 +215,7 @@ Now the pipeline will trigger automatically once there is a push to the reposito
 ## Secret Management using AWS Secrets Manager
 
 
-AWS Secrets Manager
+AWS Secrets Manager.
 
 
 ## Description

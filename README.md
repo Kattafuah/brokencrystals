@@ -23,7 +23,7 @@ Key Requirements:
 
 ## Creating a Jenkins Pipeline for SonarQube Scanning
 
-**1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090,  ...etc.
+**1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090, 9000 etc.
 
 **2.** Connect to your instance via session manager on the console. 
 
@@ -82,31 +82,36 @@ _Install suggested initial plugins and create your first Admin User by setting y
 If Jenkins becomes inaccessible, go to the terminal and start the Jenkins container
 ```docker start <container-id>``` 
 
+_Run ```docker ps -a``` to list the containers on your instance._ 
+
 **eg.** 
 ```
-docker start 00d94c57784f
+docker start 5dc03904e0cc 
 ```
 
 **11.** Access the SonarQube Server.
 
-* Access SonarQube on the browser with ```http://ipaddress:9000``` **eg.** ```http://3.131.162.22:9000```
+* Access SonarQube on the browser with ```http://ipaddress:9000``` **eg.** ```http://35.172.200.81:9000```
 * Initial username and password for SonarQube are ```admin``` and ```admin``` respectively.
 * Set your new password and click "Update".
 * Click on "create a local project".
-* Enter Project display name and Project Key, take note of these two as they will be very essential for the pipeline, in this project, "Cloudsec" was used for both.
+* Enter Project display name and Project Key, take note of these two as they will be very essential for the pipeline, in this project, "cloudsec-capstone" was used for both.
 * Enter Main branch name, make sure this is the name of your main branch in the repository you will be using. In this case it is "stable".
 * Click Next.
 * Check "Use the global setting".
 * Scroll down and click "Create new project".
-* Click "Project" at the top menu and notice your project display name showing, in this case it was Cloudsec.
+* Click "Project" at the top menu and notice your project display name showing, in this case it is cloudsec-capstone.
 
 **12.** Generate a token on the SonarQube Server to be used for Jenkins pipeline.
 
-* click on "A" at the top right corner.
-* Enter a name for your token **eg.** ```Cloudsec-SonarQube-token```
+* Click on "A" at the top right corner.
+* Select Administrator
+* Click on "Security".
+
+* Under 'Generate Tokens', enter a name for your token **eg.** ```cloudsec-capstone-token```
 * Choose "Project Analysis token" under "Type" 
-* The project name **eg.** "Cloudsec" will populate under "Project".
-* Let the 30 days expiry under "Expires in" remain.
+* The project name **eg.** "cloudsec-capstone" will populate under "Project".
+* You can set the expiry period under "Expires in" to your preferred duration. For this project the default 30 days expiry period is used.
 * Click "Generate".
 * Copy and save the token securely.
 
@@ -115,16 +120,16 @@ docker start 00d94c57784f
  
  Go back to the Jenkins server
 * Go to "Manage Jenkins".
-* Click on "System".
-* Scroll down to SonarQube Installations, check "Environmental variables" and enter a name of your choice under "Name" **eg.** "SonarQube", copy and paste the SonarQuber server URL under "Server URL" **eg.** ```http://3.131.162.22:9000/```
-* For "Server authentication token" click on the "+" symbol just before "Add" and select "Jenkins"
-* In the pop up window, select "secret text" under "Kind", copy and paste the generated SonarQube token under "Secret" and type something like "Secret jenkins token for sonarqube connection" under "Description", then click "Add".
+* Under "System Configuration" click on "System" to configure global settings and paths.
+* Scroll down to SonarQube Servers, check "Environmental variables" and click on "Add SonarQube" button under SonarQube installations. Enter a name of your choice under "Name" **eg.** "SonarQube" (take note of the name you use). Copy and paste the SonarQuber server URL under "Server URL" **eg.** ```http://35.172.200.81:9000```.
+* For "Server authentication token" click the "+ Add" tab and select "Jenkins"
+* In the pop up window, select "secret text" under "Kind", copy and paste the generated SonarQube token under "Secret". Give an appropriate description and ID (one is generated if left blank) of your choosing then click "Add".
 * Now that the credential has been created, click on the drop down under "Server authentication token" and select the description you entered in the above step.
 * Scroll down and click "Save".
 
 * Click on "Manage Jenkins".
-* Click on Tools.
-* Scroll down to SonarQube Scaner and enter the name as entered under "System" for "SonarQube Installations", that is "SonarQube".
+* Under "System Configuration", click on Tools.
+* Scroll down to SonarQube Scaner installations. Click on "Add SonarQube Scanner" and enter the name as entered under "System" for "SonarQube Installations", that is "SonarQube".
 * Click on "Save".
 
 Now a connection has been created between the Jenkins Server and the SonarQube Server.
@@ -132,11 +137,11 @@ Now a connection has been created between the Jenkins Server and the SonarQube S
 **14.** Create a Jenkins pipeline job.
 
 * Click on "Dashboard". 
-* Click "Create a job".
-* Name your job, for **eg.** "SonarQube-Cloudsec-Capstone-Project".
+* Under "Start building your software project", click "Create a job".
+* Name your job, for **eg.** "Cloudsec-Capstone-Project".
 * Click on "Pipeline".
 * Click "OK".
-* Scroll down and select "Pipeline script from SCM", select "Git" under "SCM", copy and paste your GitHub repositories URL **eg.** ```https://GitHub.com/kattafuah/brokencrystals.git``` under "Repository URL".
+* Scroll down to the "Pipeline" section of Build Triggers in the configuration page that comes up and select "Pipeline script from SCM". Select "Git" under "SCM" then copy and paste your GitHub repositories URL **eg.** ```https://GitHub.com/kattafuah/brokencrystals.git``` under "Repository URL".
 * You don't need a credential if your repository is a public, like this repository.
 * Change the name under "Branch specifier" from "*/master" to "*/stable" as is the name of the branch we are using in this repository.
 * Scroll down and ensure the "Script path" is "Jenkinsfile".

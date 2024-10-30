@@ -189,7 +189,8 @@ A successful build shows a green tick in a circle.
 
 Go to the SonarQube Server, Click on "Projects" and view the result of assessment as in the picture below:
 
-![Screenshot (94)](https://github.com/user-attachments/assets/f2dd4e2f-512d-40ea-a11e-647c8db60e6d)
+![alt text](Sonarqubeoverview.png)
+
 
 ### GitHub Webhook
 
@@ -197,18 +198,18 @@ You can automate the the build trigger by using a GitHub webhook:
 
 * Go to your GitHub repository
 * Click on "Settings" 
-* Click on "Webhook"
-* Click on "Edit" and enter your GitHub password
-* Enter a URL on this fashion ```http://jenkins_ipaddress:9090/GitHub-webhook/``` as the Payload URL **eg.** ```http://3.131.162.22:9090/GitHub-webhook/```
+* Under "Code and automations", click on "Webhooks"
+* Click on "Add webhook" and enter your GitHub password
+* Enter a URL on this fashion ```http://jenkins_ipaddress:9090/GitHub-webhook/``` as the Payload URL **eg.** ```http://35.172.200.81:9090/GitHub-webhook/```
 
-![Screenshot (95)](https://github.com/user-attachments/assets/d1bd8af8-d71d-4a1d-bd93-f7bbf958f0ad)
+![alt text](webhook.png)
 
-* Scroll down and click "Update webhook"
+* Scroll down and click "Add webhook"
 
-![Screenshot (96)](https://github.com/user-attachments/assets/82c1b083-2a9a-4c69-abbc-ae2195a8d995)
 
 * On the Jenkins Server go to the pipeline and click on "Configure"
 * Scroll down and tick "GitHub hook trigger for GITSCM polling" under "Build Triggers"
+* Click "Save".
 
 Now the pipeline will trigger automatically once there is a push to the repository on branch "stable"
 

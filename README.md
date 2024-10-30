@@ -141,7 +141,7 @@ Now a connection has been created between the Jenkins Server and the SonarQube S
 * Name your job, for **eg.** "Cloudsec-Capstone-Project".
 * Click on "Pipeline".
 * Click "OK".
-* Scroll down to the "Pipeline" section of Build Triggers in the configuration page that comes up and select "Pipeline script from SCM". Select "Git" under "SCM" then copy and paste your GitHub repositories URL **eg.** ```https://GitHub.com/kattafuah/brokencrystals.git``` under "Repository URL".
+* Scroll down to the "Pipeline" section of Build Triggers in the configuration page that comes up and select "Pipeline script from SCM". Select "Git" under "SCM" then copy and paste your GitHub repositories URL **eg.** ```https://github.com/Kattafuah/brokencrystals``` under "Repository URL".
 * You don't need a credential if your repository is a public, like this repository.
 * Change the name under "Branch specifier" from "*/master" to "*/stable" as is the name of the branch we are using in this repository.
 * Scroll down and ensure the "Script path" is "Jenkinsfile".

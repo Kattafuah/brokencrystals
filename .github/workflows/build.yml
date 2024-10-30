@@ -55,7 +55,7 @@ jobs:
 
       - name: Tag Docker images
         run: |
-            docker tag brokencrystalsnodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
+            docker tag brokencrystals_nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
             docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
             docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
        

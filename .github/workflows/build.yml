@@ -55,12 +55,18 @@ jobs:
 
       - name: Tag Docker images
         run: |
-            docker tag brokencrystals_nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
+            docker tag brokencrystalsnodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
             docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
             docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
        
     #   docker push kattafuah/brokencrystals:tagname
 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
       - name: Push Docker images
         run: |
           docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest

@@ -23,16 +23,16 @@ Key Requirements:
 
 ## Creating a Jenkins Pipeline for SonarQube Scanning
 
-**1.** Launch an amazon linux t2.large ec2 instance and assign ssm role.
+**1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090,  ...etc.
 
-**2.** Get into the terminal via ssm on the console.
+**2.** Connect to your instance via session manager on the console. 
 
 **3**. Move to root user, make sure you are in the usr directory, hence run ```cd ..``` if you are in bin. directory
 ```
 sudo su
 ```
 
-**4.** Run to download install.sh file to install docker.
+**4.** Run the following command to download install.sh file to install docker on your instance.
 ```
 wget -O install.sh https://raw.GitHubusercontent.com/kattafuah/brokencrystals/refs/heads/stable/jenkins_SonarQube/install.sh
 ```
@@ -61,16 +61,16 @@ wget -O docker-compose.yml https://raw.GitHubusercontent.com/kattafuah/brokencry
 docker-compose up -d
 ```
 
-**9.** Run this command to get the jenkins default password in the jenkins container.
+**9.** Run the following command to get the jenkins default administrator password in the jenkins container.
 ```
 docker exec -it demo-jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-**10.** Access the Jenskins Server and install pluggins.
+**10.** Access the Jenkins Server and install pluggins.
 
-Access jenkins on the browser with ```http://ipaddress:9090``` **eg..** ```http://3.131.162.22:9090```
+Access jenkins on the browser with ```http://<your instance ipaddress>:9090``` **eg..** ```http://35.172.200.81:9090```
 
-_Install initial plugins and set your new user name and password:_
+_Install suggested initial plugins and create your first Admin User by setting your new user name, password etc.:_
 
 * Go to "Manage jenkins", 
 * Got to "Plugins", 

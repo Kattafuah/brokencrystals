@@ -48,25 +48,21 @@ jobs:
         run: sudo docker images
 
       # Tagging the Docker images manually using docker tag command
+
       - name: Tag Docker images
         run: |
             docker tag brokencrystals-nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
-        #   docker tag brokencrystals-nodejs:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals-nodejs:v1.0
             docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
-        #   docker tag postgres:latest ${{ vars.DOCKERHUB_USERNAME }}/postgres:v1.0
             docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
-        #   docker tag sj26/mailcatcher:latest ${{ vars.DOCKERHUB_USERNAME }}/sj26/mailcatcher:v1.0
-
+       
     #   docker push kattafuah/brokencrystals:tagname
 
       - name: Push Docker images
         run: |
           docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/nodejs:latest
-        #   docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals-nodejs:v1.0
           docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/postgres:latest
-        #   docker push ${{ vars.DOCKERHUB_USERNAME }}/postgres:v1.0
           docker push ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals/mailcatcher:latest
-        #   docker push ${{ vars.DOCKERHUB_USERNAME }}/sj26/mailcatcher:v1.0
+      
 
 #   deploy:
 #     runs-on: ubuntu-latest

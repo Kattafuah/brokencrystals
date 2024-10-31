@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brokencrystals-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: brokencrystals
+  template:
+    metadata:
+      labels:
+        app: brokencrystals
+    spec:
+      containers:
+        - name: nodejs
+          image: IMAGE_NODEJS
+          ports:
+            - containerPort: 3000
+        - name: postgres
+          image: IMAGE_POSTGRES
+          ports:
+            - containerPort: 5432
+        - name: mailcatcher
+          image: IMAGE_MAILCATCHER
+          ports:
+            - containerPort: 1080
+
+---
+
+# Service for the deployment
+# This exposes the deployment's Pods to the outside world via a Service object.
+apiVersion: v1
+kind: Service
+metadata:
+  name: brokencrystals-service
+  labels:
+    app: brokencrystals
+spec:
+  type: LoadBalancer
+  selector:
+    app: brokencrystals
+  ports:
+    - port: 80               # Exposed port
+      targetPort: 3000       # The port your application is listening on (e.g., Node.js app)
+      protocol: TCP
+      name: http

@@ -1,8 +1,12 @@
 name: build app
 
 on:
-   push:
-    branches: stable
+  workflow_dispatch:
+  
+
+# on:
+#    push:
+#     branches: stable
    
 permissions:
   checks: write

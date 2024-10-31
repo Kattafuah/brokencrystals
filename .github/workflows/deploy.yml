@@ -34,9 +34,9 @@ jobs:
             IMAGE_TAG_POSTGRES: ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:postgres-latest
             IMAGE_TAG_MAILCATCHER: ${{ vars.DOCKERHUB_USERNAME }}/brokencrystals:mailcatcher-latest
       run: |
-            sed -i "s|IMAGE_NODEJS|$IMAGE_TAG_NODEJS|g" ./k8s/app.yaml
-            sed -i "s|IMAGE_POSTGRES|$IMAGE_TAG_POSTGRES|g" ./k8s/app.yaml
-            sed -i "s|IMAGE_MAILCATCHER|$IMAGE_TAG_MAILCATCHER|g" ./k8s/app.yaml
+            sed -i "s|IMAGE_NODEJS|$IMAGE_TAG_NODEJS|g" ./k8s/app.yml
+            sed -i "s|IMAGE_POSTGRES|$IMAGE_TAG_POSTGRES|g" ./k8s/app.yml
+            sed -i "s|IMAGE_MAILCATCHER|$IMAGE_TAG_MAILCATCHER|g" ./k8s/app.yml
 
     - name: Deploy to EKS
       run: kubectl apply -f k8s/  --validate=false # Path to your Kubernetes config files

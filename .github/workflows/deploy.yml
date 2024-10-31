@@ -1,4 +1,4 @@
-name: Cloudsec-test
+name: Cloudsec-deployment-wf
 
 on:
    workflow_dispatch:

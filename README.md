@@ -233,6 +233,10 @@ Triggering the pipeline:
 * Click on "csn-devsecops-wf" on the left pane under "All workflows"
 * Click on "Run workflow" and select the "btpscani" option
 * Click on "Run workflow" to trigger the pipeline.
+![alt text](btpscani.png)
+
+This process builds, tags, and pushes your images to your Docker Hub account, allowing you to view the results of the Docker Scout scan, as shown in the image below. Each image is tagged with the github.sha to represent the specific commit associated with the build.
+![alt text](imagescan_after_btpscanitrigger.png)
 
 
 ## Secret Management using AWS Secrets Manager

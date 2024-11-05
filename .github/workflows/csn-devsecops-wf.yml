@@ -95,7 +95,7 @@
 
 
 
-name: csn-devsecops-wffile
+name: csn-devsecops-wf
 
 on:
    workflow_dispatch:

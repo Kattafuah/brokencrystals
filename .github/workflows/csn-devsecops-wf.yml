@@ -113,7 +113,7 @@ permissions:
   checks: write
 
 jobs:
-  sast:
+  btpscani:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'btpscani' }}
     steps:

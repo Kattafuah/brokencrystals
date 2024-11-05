@@ -95,16 +95,16 @@
 
 
 
-name: Cloudsec-Brokencrystals-Buildtestfile
+name: csn-devsecops-wffile
 
 on:
    workflow_dispatch:
     inputs:
       devsecops_action:
         type: choice
-        description: select DevSecOps action
+        description: Select DevSecOps Action
         options:
-        - sast
+        - btpscani
         - deploy
         - dast
         required: true
@@ -115,7 +115,7 @@ permissions:
 jobs:
   sast:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.devsecops_action == 'sast' }}
+    if: ${{ github.event.inputs.devsecops_action == 'btpscani' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -173,13 +173,13 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-2 
+        aws-region: us-east-1 
 
     - name: Set up Kubectl
       uses: azure/setup-kubectl@v1
 
     - name: Load AWS EKS credentials
-      run: aws eks update-kubeconfig --name brokencrystals  --region us-east-2 # Change to your cluster name
+      run: aws eks update-kubeconfig --name brokencrystals  --region us-east-1 # Change to your cluster name
   
     - name: Update Deployment Image 
       env:

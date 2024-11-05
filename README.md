@@ -19,7 +19,7 @@ To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to a
 **5.** Dynamic Application Security Testing (DAST): Implement DAST tools (such as OWASP ZAP) into the pipeline to test for vulnerabilities after deployment.
 
 
-## Static Code Analysis - Creating a Jenkins Pipeline for SonarQube Scanning
+## Static Code Analysis (SAST) - Creating a Jenkins Pipeline for SonarQube Scanning
 
 **1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090, 9000 etc.
 
@@ -199,18 +199,41 @@ You can automate the the build trigger by using a GitHub webhook:
 * Click on "Settings" 
 * Under "Code and automations", click on "Webhooks"
 * Click on "Add webhook" and enter your GitHub password
-* Enter a URL on this fashion ```http://jenkins_ipaddress:9090/GitHub-webhook/``` as the Payload URL **eg.** ```http://35.172.200.81:9090/GitHub-webhook/```
+* Enter a URL on this fashion ```http://jenkins_ipaddress:9090/github-webhook/``` as the Payload URL **eg.** ```http://54.146.201.60:9090/github-webhook/```
 
-![alt text](webhook.png)
+![alt text](webhookprop.png)
 
-* Scroll down and click "Add webhook"
+* Scroll down and click "Add webhook" or "Update webhook". 
 
 
 * On the Jenkins Server go to the pipeline and click on "Configure"
 * Scroll down and tick "GitHub hook trigger for GITSCM polling" under "Build Triggers"
 * Click "Save".
 
-Now the pipeline will trigger automatically once there is a push to the repository on branch "stable"
+Now the pipeline will trigger automatically once there is a push to the repository on branch "stable".
+
+## Image scanning for deployed Docker images on Dockerhub
+Image security insights can be gained via the use of Docker Scout on DockerHub. Images built, tagged and pushed can be scanned automatically providing much needed insights impact of new CVEs on your images. For this project, this can be accomplished via the use of a manual trigger of the .github/workflows/csn-devsecops-wf.yml file in this repository. This file contains three trigger options i.e.  btpscani, deploy and dast. The btpscani trigger will facilitate the build, tag, push and scanning of your Docker images. The deploy trigger will deploy the application to your Kubernetes cluster. The dast trigger will implement OWASP ZAP to test for vulnerabilities after deployment. 
+
+Pre-requisites: 
+* Dockerhub account
+* Dockerhub repository
+
+Image scanning for Docker images deployed to Dockerhub can be achieved by following the following steps: 
+* Create a Dockerhub account (if you don't already have one).
+* Create a Dockerhub repository for your Docker image - in this case "brokencrystals".
+* Select the brokencrystals repository on Dockerhub, got to "settings" and check the "Docker Scout image analysis" option. 
+![alt text](dockerscoutsetup.png)
+* In your GitHub repository, create a secret/variable for your DOCKERHUB_USERNAME
+* In your GitHub repository, create a secret for your DOCKERHUB_PASSWORD
+
+Triggering the pipeline:
+* Go to your GitHub repository
+* Click on "Actions"
+* Click on "csn-devsecops-wf" on the left pane under "All workflows"
+* Click on "Run workflow" and select the "btpscani" option
+* Click on "Run workflow" to trigger the pipeline.
+
 
 ## Secret Management using AWS Secrets Manager
 

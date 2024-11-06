@@ -83,7 +83,7 @@ spec:
     spec:
       initContainers:
       - name: check-db-ready
-        image: postgres:latest
+        image: kattafuah/brokencrystals:postgres-VERSION_TAG
         command: ['sh', '-c', '
           echo "Waiting for database to be ready...";
           until pg_isready -h db -p 5432; do 

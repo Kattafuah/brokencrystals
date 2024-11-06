@@ -95,7 +95,7 @@ jobs:
       run: kubectl apply -f k8s/  --validate=false # Path to your Kubernetes config files
   
     - name: Verify deployment
-      run: kubectl rollout status deployment/githubactions-demo  # Change to your deployment resource name
+      run: kubectl rollout status deployment/nodejs # Change to your deployment resource name
 
 
   dast:

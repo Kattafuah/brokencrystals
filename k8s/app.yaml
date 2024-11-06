@@ -50,7 +50,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 1Gi
   storageClassName: gp3  # This uses the 'gp2' StorageClass for dynamic provisioning
 
 ---

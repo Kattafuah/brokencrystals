@@ -26,6 +26,19 @@ spec:
       port: 5432
       targetPort: 5432
 ---
+#PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
 ---
 # postgres-statefulset.yaml
 apiVersion: apps/v1

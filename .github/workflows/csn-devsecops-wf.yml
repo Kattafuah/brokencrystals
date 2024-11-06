@@ -85,8 +85,8 @@ jobs:
       run: aws eks update-kubeconfig --name cloudsec_cluster  --region us-east-1 # Change to your cluster name
   
     - name: Update Deployment Image 
-      env:
-         IMAGE_TAG: ${{ github.sha }}
+      # env:
+      #    IMAGE_TAG: ${{ github.sha }}
          
       run: |
         sed -i "s/VERSION_TAG/${{ github.sha }}/g" ./k8s/app.yaml

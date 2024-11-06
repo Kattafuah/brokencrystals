@@ -26,6 +26,19 @@ spec:
       port: 5432
       targetPort: 5432
 ---
+#StorageClass
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3  # You can specify 'gp2' or 'io1' for different types of EBS volumes
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp3  # Choose the type of EBS volume you need (e.g., 'gp2' or 'io1')
+  fsType: ext4
+
+---
 #PVC
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -37,7 +50,8 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
+  storageClassName: gp3  # This uses the 'gp2' StorageClass for dynamic provisioning
 
 ---
 # postgres-statefulset.yaml
@@ -72,7 +86,7 @@ spec:
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
-          subPath: postgres  # Added to prevent permission issues
+          # subPath: postgres  # Added to prevent permission issues
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:

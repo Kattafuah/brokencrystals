@@ -346,7 +346,7 @@ Make sure your cluster is created before executing the command to create a node 
 Once the Cluster and Node Group are ready, you can proceed with deploying to AWS EKS.
 
   1. Configure repository secrets for AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-  2. Update the name of your AWS EKS cluster on line 91 from "brokencrystals" to match your cluster's name.
+  2. Update the name of your AWS EKS cluster on line 85 from "brokencrystals" to match your cluster's name.
   3. In your GitHub repository, navigate to the "Actions" tab in the top menu.
   4. Select "csn-devsecops-wf" from the left sidebar.
   5. Click "Run workflow."

@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       POSTGRES_DB: bc
-      POSTGRES_USER: bc
-      POSTGRES_PASSWORD: bc
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     healthcheck:
       interval: 10s
       retries: 10
@@ -33,7 +33,7 @@ services:
         condition: on-failure
       resources:
         limits:
-          cpus: 3.5
+          cpus: "3.5"
     logging:
       options:
         max-file: '5'

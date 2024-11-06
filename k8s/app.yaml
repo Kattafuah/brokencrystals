@@ -85,6 +85,7 @@ metadata:
   name: nodejs
   namespace: default
 spec:
+  terminationGracePeriodSeconds: 60
   replicas: 1
   selector:
     matchLabels:
@@ -130,11 +131,11 @@ spec:
           value: "1025"
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
             memory: "512Mi"
-            cpu: "200m"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
 ---
 
 apiVersion: v1

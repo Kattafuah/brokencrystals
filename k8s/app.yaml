@@ -129,6 +129,7 @@ kind: Service
 metadata:
   name: nodejs
 spec:
+  type: LoadBalancer
   selector:
     app: nodejs
   ports:

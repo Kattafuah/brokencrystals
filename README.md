@@ -356,7 +356,8 @@ Once the Cluster and Node Group are ready, you can proceed with deploying to AWS
 5. # Update 'kubeconfig'
 To manage your cluster with kubectl, update your kubeconfig file:
 
-aws eks update-kubeconfig --name <ClusterName>
+
+```aws eks update-kubeconfig --region <your-region> --name <cluster-name>```
 
   
 

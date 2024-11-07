@@ -29,45 +29,6 @@ spec:
   type: ClusterIP
 
 ---
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: db-deployment
-#   namespace: default
-# spec:
-#   replicas: 1
-#   selector:
-#     matchLabels:
-#       app: db
-#   template:
-#     metadata:
-#       labels:
-#         app: db
-#     spec:
-#       containers:
-#         - name: db
-#           image: kattafuah/brokencrystals:postgres-VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
-#           env:
-#             - name: POSTGRES_DB
-#               value: "bc"
-#             - name: POSTGRES_USER
-#               valueFrom:
-#                 configMapKeyRef:
-#                   name: app-config
-#                   key: DATABASE_USER
-#             - name: POSTGRES_PASSWORD
-#               valueFrom:
-#                 configMapKeyRef:
-#                   name: app-config
-#                   key: DATABASE_PASSWORD
-#           ports:
-#             - containerPort: 5432
-#       volumes:  # Moved out of containers section
-#         - name: pg-volume
-#           configMap:
-#             name: app-config
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -85,7 +46,7 @@ spec:
     spec:
       containers:
         - name: db
-          image: kattafuah/brokencrystals:postgres-VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:postgres-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
           env:
             - name: POSTGRES_DB
               value: "bc"
@@ -104,7 +65,7 @@ spec:
           volumeMounts:
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d/pg.sql
-              # subPath: pg.sql
+              subPath: pg.sql
       volumes:
         - name: pg-volume
           configMap:
@@ -121,7 +82,6 @@ metadata:
   namespace: default
 data:
   pg.sql: |
-    -- Your pg.sql content goes here
     set names 'utf8';
     set session_replication_role = 'replica';
 
@@ -186,7 +146,7 @@ spec:
     spec:
       containers:
         - name: nodejs
-          image: kattafuah/brokencrystals:nodejs-VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:nodejs-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
           envFrom:
             - configMapRef:
                 name: app-config
@@ -256,7 +216,7 @@ spec:
     spec:
       containers:
         - name: mailcatcher
-          image: kattafuah/brokencrystals:mailcatcher-VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:mailcatcher-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
           ports:
             - containerPort: 1080
             - containerPort: 1025

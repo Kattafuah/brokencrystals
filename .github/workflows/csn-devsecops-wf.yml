@@ -124,7 +124,10 @@ jobs:
         run: |
           # Create a directory to ensure permissions are correct
           mkdir -p zap-output
-        
+
+          # Set directory permissions
+          chmod 777 -R zap-output/
+          
           # Run OWASP ZAP scan, mounting the zap-output directory
           echo "Running OWASP ZAP DAST scan..."
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
@@ -135,6 +138,11 @@ jobs:
         run: |
           echo "Checking contents of zap-output directory..."
           ls -la zap-output/
+
+      - name: Check ZAP container logs
+        run: |
+          docker logs $(docker ps -lq) || true
+            
 
       - name: Display ZAP Report (Optional)
         if: ${{ always() }}
@@ -151,5 +159,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: zap-report
-          path: zap-output/zap-report.html
+          path: zap-output/*.html
 

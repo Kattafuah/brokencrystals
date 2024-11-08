@@ -99,12 +99,57 @@ jobs:
           # Replace <your-app-url> with the actual URL for your application
           curl --fail --silent --show-error http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/health || { echo 'Health check failed'; exit 1; }
 
+  # dast:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event.inputs.devsecops_action == 'dast' }}
+  #   steps:
+  #     - name: OWASP ZAP DAST Scan
+  #       continue-on-error: true
+  #       run: |
+  #         docker run --rm -v $(pwd):/zap/wrk:rw zaproxy/zap-stable zap-baseline.py -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' -r /zap/wrk/zap-report.html || true
+  #         ls -la /zap/wrk
+
   dast:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'dast' }}
     steps:
-      - name: OWASP ZAP DAST Scan
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Run OWASP ZAP DAST Scan
         continue-on-error: true
         run: |
-          docker run --rm -v $(pwd):/zap/wrk:rw zaproxy/zap-stable zap-baseline.py -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' -r /zap/wrk/zap-report.html || true
-          ls -la /zap/wrk
+          # Create a directory to ensure permissions are correct
+          mkdir -p zap-output
+        
+          # Run OWASP ZAP scan, mounting the zap-output directory
+          echo "Running OWASP ZAP DAST scan..."
+          docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
+          -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' \
+          -r zap-report.html || true
+
+      - name: List output directory contents
+        run: |
+          echo "Checking contents of zap-output directory..."
+          ls -la zap-output/
+
+      - name: Display ZAP Report (Optional)
+        if: ${{ always() }}
+        run: |
+          if [ -f zap-output/zap-report.html ]; then
+          echo "ZAP report generated successfully. Displaying a preview:"
+          cat zap-output/zap-report.html | head -n 50
+          else
+          echo "ZAP report not generated."
+          fi
+
+      - name: Upload ZAP Report (Optional)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: zap-output/zap-report.html
+

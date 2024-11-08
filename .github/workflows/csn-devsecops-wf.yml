@@ -106,4 +106,5 @@ jobs:
       - name: OWASP ZAP DAST Scan
         continue-on-error: true
         run: |
-          docker run --rm -v $(pwd):/zap/wrk:rw zaproxy/zap-stable zap-baseline.py -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' -r zap-report.html || true
+          docker run --rm -v $(pwd):/zap/wrk:rw zaproxy/zap-stable zap-baseline.py -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' -r /zap/wrk/zap-report.html || true
+          ls -la /zap/wrk

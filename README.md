@@ -341,27 +341,53 @@ Use the ARN of this newly created custom role when creating your node group:
 
 e.g. ```aws eks create-nodegroup --region us-east-1 --cluster-name cloudsec_cluster --nodegroup-name brokencrystals_node --node-role arn:aws:iam::893475754589:role/MyCustomEKSNodeGroupRole --subnets subnet-09cd5f7346f0f4567 subnet-00ca6185b0d2365a6 --instance-types t2.medium --scaling-config minSize=3,maxSize=5,desiredSize=3```
 
-Make sure your cluster is created before executing the command to create a node group.
+**Make sure your cluster is created before executing the command to create a node group.**
 
-Once the Cluster and Node Group are ready, you can proceed with deploying to AWS EKS.
-
-  1. Configure repository secrets for AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.
-  2. Update the name of your AWS EKS cluster on line 85 from "brokencrystals" to match your cluster's name.
-  3. In your GitHub repository, navigate to the "Actions" tab in the top menu.
-  4. Select "csn-devsecops-wf" from the left sidebar.
-  5. Click "Run workflow."
-  6. Ensure "deploy" is chosen in the pop-up, then click "Run workflow."
-  7. You can monitor the workflow's output as it executes.
-
-5. # Update 'kubeconfig'
-To manage your cluster with kubectl, update your kubeconfig file:
-
+4e. # Update 'kubeconfig'
+To manage your cluster with kubectl, update your kubeconfig file by using:
 
 ```aws eks update-kubeconfig --region <your-region> --name <cluster-name>```
-
-  
-
 ## Secret Management using AWS Secrets Manager
+
+
+## Deploying to the EKS Environment
+
+Prerequisites
+* An AWS EKS cluster with a ready Cluster and Node Group.
+* Necessary AWS IAM permissions to configure deployments.
+* Configured AWS secrets in your GitHub repository.
+* Docker images built and tagged, and available in your container registry.
+
+## Deployment Steps Using GitHub Actions
+Follow these steps to deploy the application to your AWS EKS cluster using the ```csn-devsecops-wf.yml``` GitHub Actions workflow.
+
+1. ### Configure Repository Secrets
+* Ensure that ```AWS_ACCESS_KEY_ID``` and ```AWS_SECRET_ACCESS_KEY``` are configured as secrets in your GitHub repository to allow access to AWS services.
+
+2. ### Update the AWS EKS Cluster Name
+* Open the ```csn-devsecops-wf.yml``` workflow file and navigate to line 82.
+* Replace ``"cloudsec_cluster"`` with the name of your EKS cluster.
+
+3. ### Navigate to the GitHub Actions Tab
+* Go to your GitHub repository and click on the "Actions" tab in the top menu.
+
+4. ### Select the ``csn-devsecops-wf`` Workflow
+* Choose ```csn-devsecops-wf``` from the list on the left sidebar.
+
+5. ### Trigger the Deployment Workflow
+
+* Click the "Run workflow" button on the GitHub Actions page.
+* In the pop-up that appears, ensure that "deploy" is selected as the action to be performed.
+* Click "Run workflow" to start the deployment process.
+
+6. ### Monitor the Workflow Execution
+* The workflow logs can be monitored to track the progress of your deployment and ensure there are no issues during the execution.
+
+## Kubernetes Manifest Reference
+The deployment makes use of a Kubernetes manifest file located at ```./k8s/app.yml```. This file defines various resources required for the application, such as ConfigMaps, Services, and Deployments. Ensure any environment-specific configurations are adjusted as needed before deploying.
+ 
+
+
 
 
 AWS Secrets Manager.

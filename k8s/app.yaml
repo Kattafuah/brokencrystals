@@ -7,72 +7,20 @@ metadata:
 data:
   DATABASE_HOST: "db-service"
   DATABASE_SCHEMA: "bc"
-  DATABASE_USER: "bc"
-  DATABASE_PASSWORD: "bc"
   DATABASE_PORT: "5432"
   URL: "http://nodejs-service:80"
   # Add other environment variables from your .env file as needed
-
 ---
-apiVersion: v1
-kind: Service
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
 metadata:
-  name: db-service
-  namespace: default
+  name: aws-secrets
 spec:
-  selector:
-    app: db
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
-  type: ClusterIP
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: db-deployment
-  namespace: default
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: db
-  template:
-    metadata:
-      labels:
-        app: db
-    spec:
-      containers:
-        - name: db
-          image: kattafuah/brokencrystals:postgres-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
-          env:
-            - name: POSTGRES_DB
-              value: "bc"
-            - name: POSTGRES_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: DATABASE_USER
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: DATABASE_PASSWORD
-          ports:
-            - containerPort: 5432
-          volumeMounts:
-            - name: init-script
-              mountPath: /docker-entrypoint-initdb.d/pg.sql
-              subPath: pg.sql
-      volumes:
-        - name: pg-volume
-          configMap:
-            name: app-config
-        - name: init-script
-          configMap:
-            name: db-init-scripts-configmap
+  provider: aws
+  parameters:
+    objects: |
+      - objectName: "csn/bc/postgresql"
+        objectType: "secretsmanager"
 
 ---
 apiVersion: v1
@@ -111,7 +59,75 @@ data:
 
     CREATE INDEX IF NOT EXISTS "IDX_users_email" ON "user" ("email");
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: default
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      volumes:
+        - name: pg-volume
+          configMap:
+            name: app-config
+        - name: init-script
+          configMap:
+            name: db-init-scripts-configmap
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "aws-secrets"
+      containers:
+        - name: db
+          image: kattafuah/brokencrystals:postgres-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881
+          env:
+            - name: POSTGRES_DB
+              value: "bc"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets  # Matches your SecretProviderClass
+                  key: DATABASE_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets  # Matches your SecretProviderClass
+                  key: DATABASE_PASSWORD
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/pg.sql
+              subPath: pg.sql
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
 
 ---
 apiVersion: v1
@@ -176,7 +192,6 @@ spec:
             failureThreshold: 3
             successThreshold: 1
 
-
 ---
 apiVersion: v1
 kind: Service
@@ -196,7 +211,6 @@ spec:
       port: 1025
       targetPort: 1025
   type: ClusterIP
-
 
 ---
 apiVersion: apps/v1

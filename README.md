@@ -346,12 +346,35 @@ e.g. ```aws eks create-nodegroup --region us-east-1 --cluster-name cloudsec_clus
 
   4e. Update ``'kubeconfig'``
 
-To manage your cluster with kubectl, update your kubeconfig file by using:
+To manage your cluster with `kubectl`, update your kubeconfig file by using on your terminal:
 
 ```aws eks update-kubeconfig --region <your-region> --name <cluster-name>```
 
 ## Secret Management using AWS Secrets Manager
 
+To store and manage database passwords (and other sensitive data) using AWS Secrets Manager, you can follow these steps. Secrets Manager provides a secure and convenient way to store, retrieve, and rotate secrets like database credentials. Here's how to integrate it:
+
+  1. Create a Secret in AWS Secrets Manager
+  2. 
+* Navigate to AWS Secrets Manager:
+
+    * Go to the AWS Management Console.
+    * Select Secrets Manager from the services menu.
+* Store a New Secret:
+
+    * Click Store a new secret.
+    * Choose **Other type of secret** (or select Credentials for RDS database if applicable).
+    * In the key-value pairs section, enter your sensitive data (e.g., `username`, `password`).
+  * Example:
+```
+Key: DATABASE_USER
+Value: <your-db-user>
+
+Key: DATA_PASSWORD
+Value: <your-db-password>
+```
+    * Click **Next** and provide a **Secret name** (e.g., `csn/bc/postgresql`).
+    * Configure access permissions (IAM policies) and complete the secret creation.
 
 ## Deploying to the EKS Environment
 

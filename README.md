@@ -249,14 +249,14 @@ AWS EKS Cluster and NodeGroup
 
 Follow the steps below to create an AWS Cluster:
 
-# How to Setup an EKS Cluster using AWS CLI
+### Setting up an EKS Cluster using AWS CLI
 
-1.  # Install and Configure the AWS CLI
+1.  #### Install and Configure the AWS CLI
 Ensure that you have the AWS CLI installed and configured with the necessary access credentials and default region. If not already done, you can configure it by running:
 
 ```aws configure```
 
-2. # Create an IAM Role for EKS
+2. #### Create an IAM Role for EKS
 Create an IAM role that EKS can assume to create AWS resources for Kubernetes. You need this role to allow EKS service to manage resources on your behalf.
 
 Create a file called trust.json in your working directory on your local machine with the following policy:
@@ -274,30 +274,30 @@ Create a file called trust.json in your working directory on your local machine 
   ]
 }
 ```
-# Run the following command to create the role:
+##### Run the following command to create the role:
 
 ```aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://trust.json```
 
-# Attach the EKS service policy to the role:
+##### Attach the EKS service policy to the role:
 ```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy```
 
 ```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy```
 
-3. # Create the EKS Cluster
-You can create the cluster using the following command. Replace <ClusterName>, <RoleARN>, and other placeholders with your specific values.
+3. #### Create the EKS Cluster
+You can create the cluster using the following command. Replace ``<ClusterName>``, ``<RoleARN>``, and other placeholders with your specific values.
 
 ```aws eks create-cluster --name <ClusterName> --role-arn <RoleARN> --resources-vpc-config subnetIds=<Subnet1,Subnet2>,securityGroupIds=<SecurityGroupId>```
 
-- <RoleARN> is the ARN of the role you created above. 
-- <Subnet1,Subnet2> copy the ID of the subnets you want to deploy into. Always use a private subnet when available to make your cluster publicly inaccessible. 
-- <SecurityGroupId> use an existing securitygroup ID with the necessary permissions. 
+- ``<RoleARN>`` is the ARN of the role you created above. 
+- ``<Subnet1,Subnet2>`` copy the ID of the subnets you want to deploy into. Always use a private subnet when available to make your cluster publicly inaccessible. 
+- ``<SecurityGroupId>`` use an existing securitygroup ID with the necessary permissions. 
 
 e.g. ```aws eks create-cluster --region us-east-1 --name cloudsec_cluster --role-arn arn:aws:iam::893475754589:role/eksServiceRole  --resources-vpc-config subnetIds=subnet-09cd5f7346f0f4567,subnet-00ca6185b0d2365a6,securityGroupIds=sg-0afbe148f8cdd7dqr```
 
-4. # Create a Node Group
+4. #### Create a Node Group
 Before creating a node group, you need an IAM role for the EKS worker nodes. Create a similar trust policy for the worker nodes and attach the necessary IAM policies (AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly).
 
-4a. # Create the Trust Relationship Policy Document
+  4a. Create the Trust Relationship Policy Document
 
 Save the following policy to a file named eks-nodegroup-trust-policy.json. This policy allows EC2 and EKS services to assume the role.
 ```
@@ -317,12 +317,13 @@ Save the following policy to a file named eks-nodegroup-trust-policy.json. This 
   ]
 }
 ```
-4b. # Create the Role
+  4b. Create the Role
+
 Use the AWS CLI to create a new role with this trust relationship.
 
 ```aws iam create-role --role-name MyCustomEKSNodeGroupRole --assume-role-policy-document file://eks-nodegroup-trust-policy.json```
 
-4c. # Attach Policies:
+  4c. Attach Policies
 
 Attach the necessary policies to the role. These typically include AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly, and any other policies specific to your deployment.
 
@@ -333,7 +334,7 @@ Attach the necessary policies to the role. These typically include AmazonEKSWork
 ```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly```
 
 
-4d. # Use the Custom Role in Your EKS Node Group Creation
+  4d. Use the Custom Role in Your EKS Node Group Creation
 
 Use the ARN of this newly created custom role when creating your node group:
 
@@ -341,12 +342,14 @@ Use the ARN of this newly created custom role when creating your node group:
 
 e.g. ```aws eks create-nodegroup --region us-east-1 --cluster-name cloudsec_cluster --nodegroup-name brokencrystals_node --node-role arn:aws:iam::893475754589:role/MyCustomEKSNodeGroupRole --subnets subnet-09cd5f7346f0f4567 subnet-00ca6185b0d2365a6 --instance-types t2.medium --scaling-config minSize=3,maxSize=5,desiredSize=3```
 
-**Make sure your cluster is created before executing the command to create a node group.**
+**_Make sure your cluster is created before executing the command to create a node group._**
 
-4e. # Update 'kubeconfig'
+  4e. Update ``'kubeconfig'``
+
 To manage your cluster with kubectl, update your kubeconfig file by using:
 
 ```aws eks update-kubeconfig --region <your-region> --name <cluster-name>```
+
 ## Secret Management using AWS Secrets Manager
 
 
@@ -358,32 +361,32 @@ Prerequisites
 * Configured AWS secrets in your GitHub repository.
 * Docker images built and tagged, and available in your container registry.
 
-## Deployment Steps Using GitHub Actions
+### Deployment Steps Using GitHub Actions
 Follow these steps to deploy the application to your AWS EKS cluster using the ```csn-devsecops-wf.yml``` GitHub Actions workflow.
 
-1. ### Configure Repository Secrets
+1. #### Configure Repository Secrets
 * Ensure that ```AWS_ACCESS_KEY_ID``` and ```AWS_SECRET_ACCESS_KEY``` are configured as secrets in your GitHub repository to allow access to AWS services.
 
-2. ### Update the AWS EKS Cluster Name
+2. #### Update the AWS EKS Cluster Name
 * Open the ```csn-devsecops-wf.yml``` workflow file and navigate to line 82.
 * Replace ``"cloudsec_cluster"`` with the name of your EKS cluster.
 
-3. ### Navigate to the GitHub Actions Tab
+3. #### Navigate to the GitHub Actions Tab
 * Go to your GitHub repository and click on the "Actions" tab in the top menu.
 
-4. ### Select the ``csn-devsecops-wf`` Workflow
+4. #### Select the ``csn-devsecops-wf`` Workflow
 * Choose ```csn-devsecops-wf``` from the list on the left sidebar.
 
-5. ### Trigger the Deployment Workflow
+5. #### Trigger the Deployment Workflow
 
 * Click the "Run workflow" button on the GitHub Actions page.
 * In the pop-up that appears, ensure that "deploy" is selected as the action to be performed.
 * Click "Run workflow" to start the deployment process.
 
-6. ### Monitor the Workflow Execution
+6. #### Monitor the Workflow Execution
 * The workflow logs can be monitored to track the progress of your deployment and ensure there are no issues during the execution.
 
-## Kubernetes Manifest Reference
+### Kubernetes Manifest Reference
 The deployment makes use of a Kubernetes manifest file located at ```./k8s/app.yml```. This file defines various resources required for the application, such as ConfigMaps, Services, and Deployments. Ensure any environment-specific configurations are adjusted as needed before deploying.
  
 

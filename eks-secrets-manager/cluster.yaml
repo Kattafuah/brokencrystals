@@ -1,0 +1,15 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: csn-capstone
+  region: us-east-1
+
+iam:
+  withOIDC: true
+
+nodeGroups:
+  - name: ng-general
+    instanceType: t3.medium
+    instanceName: cloudsec-node
+    desiredCapacity: 1

@@ -283,6 +283,8 @@ Create a file called trust.json in your working directory on your local machine 
 
 ```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy```
 
+ ***```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite```
+
 3. #### Create the EKS Cluster
 You can create the cluster using the following command. Replace ``<ClusterName>``, ``<RoleARN>``, and other placeholders with your specific values.
 
@@ -333,6 +335,7 @@ Attach the necessary policies to the role. These typically include AmazonEKSWork
 
 ```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly```
 
+ ```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite```
 
   4d. Use the Custom Role in Your EKS Node Group Creation
 
@@ -355,7 +358,7 @@ To manage your cluster with `kubectl`, update your kubeconfig file by using on y
 To store and manage database passwords (and other sensitive data) using AWS Secrets Manager, you can follow these steps. Secrets Manager provides a secure and convenient way to store, retrieve, and rotate secrets like database credentials. Here's how to integrate it:
 
   1. Create a Secret in AWS Secrets Manager
-  2. 
+ 
 * Navigate to AWS Secrets Manager:
 
     * Go to the AWS Management Console.
@@ -375,6 +378,85 @@ Value: <your-db-password>
 ```
     * Click **Next** and provide a **Secret name** (e.g., `csn/bc/postgresql`).
     * Configure access permissions (IAM policies) and complete the secret creation.
+
+  2. Ensure the Secrets Store CSI Driver is Installed
+
+The `SecretProviderClass` resource is part of the Kubernetes Secrets Store CSI Driver, which allows your pods to access external secrets (e.g., from AWS Secrets Manager).
+  
+  * Installing the Secrets Store CSI Driver you install the driver using Helm (assuming you have Helm installed):
+  ```
+  helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
+  helm repo update
+  helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace kube-system
+  ```
+  * Verify the driver is running and the SecretProviderClass is created:
+  ```
+  kubectl get pods -n kube-system
+  or 
+  kubectl get secretproviderclass -n kube-system
+  ```
+  You should see pods related to csi-secrets-store running successfully.
+  
+  * Check for CRDs (Custom Resource Definitions) by verifying that the `SecretProviderClass` exists in your cluster by running:
+  
+  ```kubectl get crd```
+   
+   Ensure that you see something like `secretproviderclasses.secrets-store.csi.x-k8s.io` in the output. If it is missing, the driver installation may have failed or needs to be retried.
+  * Install the AWS Provider Plugin for the Secrets Store CSI Driver: 
+
+  ```kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml``` 
+  * Verify the AWS Provider Plugin is installed by checking the pods in the `kube-system` namespace
+  * Make sure you are applying resources in the correct namespace. If your resources are in a specific namespace, ensure that the `SecretProviderClass` resource is also created in that namespace. You can specify it explicitly:
+  ```
+  apiVersion: secrets-store.csi.x-k8s.io/v1
+  kind: SecretProviderClass
+  metadata:
+    name: aws-secrets
+    namespace: your-namespace
+  spec:
+    ...
+  ```
+  3. Ensure the OIDC Provider is Configured in AWS
+    * Check if the OIDC provider exists for your EKS cluster by going to the IAM Console in AWS:
+
+      - Navigate to the *IAM* dashboard.
+      - Select *Identity Providers*.
+      - Ensure that there's a provider for `oidc.eks.us-east-1.amazonaws.com/id/<eks-cluster-id>`. 
+      
+      If the OIDC provider doesn't exist, create it manually using the following command:
+
+      ```aws eks --region us-east-1 update-kubeconfig --name <your-cluster-name>```
+    * Again, in the AWS Management Console:
+
+      - Navigate to EKS.
+      - Select your cluster.
+      - In the *Details* section on the *Overview* tab, note the value of the *OpenID Connect provider URL*.
+    * Navigate back to the *IAM* dashboard. 
+      - Select *Identity Providers*.
+      - Click on *Add provider*.
+      - Select *OpenID Connect* as the provider type.
+      - Enter/paste the *URL* of your OIDC provider (the one you copied earlier).
+      - Enter `sts.amazonaws.com` for *Audience*.
+      - Click *Add provider*.
+
+  4. Create a SecretProviderClass Resource
+
+    * Add the SecretProviderClass Resource: Ensure you create a SecretProviderClass in your manifest:
+    ```
+    apiVersion: secrets-store.csi.x-k8s.io/v1
+    kind: SecretProviderClass
+    metadata:
+      name: aws-secrets
+      namespace: your-namespace
+    spec:
+      provider: aws
+      parameters:
+        objects: |
+          - objectName: csn/bc/postgresql
+            objectType: secretsmanager # Specify the type (e.g., secretsmanager or ssmparameter)
+      ```
+    Make sure to replace `your-namespace` with the appropriate namespace, and keep the secret name `csn/bc/postgresql` consistent throughout your configurations.
+
 
 ## Deploying to the EKS Environment
 

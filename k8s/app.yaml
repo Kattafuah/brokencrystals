@@ -8,20 +8,10 @@ data:
   DATABASE_HOST: "db-service"
   DATABASE_SCHEMA: "bc"
   DATABASE_PORT: "5432"
+  DATABASE_PASSWORD: "/mnt/secrets-store/DATABASE_PASSWORD"
+  DATABASE_USER: "/mnt/secrets-store/DATABASE_USER"
   URL: "http://nodejs-service:80"
   # Add other environment variables from your .env file as needed
----
-apiVersion: secrets-store.csi.x-k8s.io/v1
-kind: SecretProviderClass
-metadata:
-  name: aws-secrets
-spec:
-  provider: aws
-  parameters:
-    objects: |
-      - objectName: "csn/bc/postgresql"
-        objectType: "secretsmanager"
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -60,6 +50,7 @@ data:
     CREATE INDEX IF NOT EXISTS "IDX_users_email" ON "user" ("email");
 
 ---
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -80,6 +71,8 @@ kind: Deployment
 metadata:
   name: db-deployment
   namespace: default
+  labels:
+    app: db
 spec:
   replicas: 1
   selector:
@@ -90,6 +83,7 @@ spec:
       labels:
         app: db
     spec:
+      serviceAccountName: csn-capstone-service-account
       volumes:
         - name: pg-volume
           configMap:
@@ -97,12 +91,12 @@ spec:
         - name: init-script
           configMap:
             name: db-init-scripts-configmap
-        - name: secrets-store-inline
+        - name: dbcredentials
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
-              secretProviderClass: "aws-secrets"
+              secretProviderClass: "bc-db-credentials"
       containers:
         - name: db
           image: kattafuah/brokencrystals:postgres-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881
@@ -110,22 +104,16 @@ spec:
             - name: POSTGRES_DB
               value: "bc"
             - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: aws-secrets  # Matches your SecretProviderClass
-                  key: DATABASE_USER
+              value: /mnt/secrets-store/DATABASE_USER
             - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: aws-secrets  # Matches your SecretProviderClass
-                  key: DATABASE_PASSWORD
+              value: /mnt/secrets-store/DATABASE_PASSWORD
           ports:
             - containerPort: 5432
           volumeMounts:
             - name: init-script
               mountPath: /docker-entrypoint-initdb.d/pg.sql
               subPath: pg.sql
-            - name: secrets-store-inline
+            - name: dbcredentials
               mountPath: "/mnt/secrets-store"
               readOnly: true
 

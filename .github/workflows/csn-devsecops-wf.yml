@@ -125,15 +125,17 @@ jobs:
           # Set directory permissions
           chmod 777 -R zap-output/
           
-          - name: Debug APP_URL value
+          # Debug APP_URL value
           echo "APP_URL: $APP_URL"
 
           # Normalize APP_URL to start with "http://" if not specified, replacing any existing protocol
           if [[ ! "$APP_URL" =~ ^http[s]?:// ]]; then
             APP_URL="http://$APP_URL"
           fi
-        
+          echo "Normalized APP_URL: $APP_URL"
+
           echo "Running OWASP ZAP scan on URL: $APP_URL"
+
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
           -t "$APP_URL" \
           -r zap-report.html || true

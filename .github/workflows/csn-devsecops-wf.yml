@@ -100,6 +100,8 @@ jobs:
 
           # Set the URL as an output to be used in the next job
           echo "APP_URL=$APP_URL" >> $GITHUB_ENV
+          
+
 
   dast:
     runs-on: ubuntu-latest
@@ -121,11 +123,16 @@ jobs:
           # Set directory permissions
           chmod 777 -R zap-output/
           
+          - name: Debug APP_URL value
+          echo "APP_URL: $APP_URL"
+
           # Normalize APP_URL to start with "http://" if not specified, replacing any existing protocol
           if [[ ! "$APP_URL" =~ ^http[s]?:// ]]; then
             APP_URL="http://$APP_URL"
+          else 
+            APP_URL="http://$APP_URL"
           fi
-          
+        
           echo "Running OWASP ZAP scan on URL: $APP_URL"
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
           -t "$APP_URL" \
@@ -139,7 +146,7 @@ jobs:
       - name: Check ZAP container logs
         run: |
           docker logs $(docker ps -lq) || true
-          
+        
       - name: Display ZAP Report 
         if: ${{ always() }}
         run: |
@@ -156,3 +163,4 @@ jobs:
         with:
           name: zap-report
           path: zap-output/*.html
+

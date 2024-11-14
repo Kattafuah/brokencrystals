@@ -109,16 +109,19 @@ jobs:
 
   dast:
     runs-on: ubuntu-latest
-    #if: ${{ github.event.inputs.devsecops_action == 'dast' }}
-    needs: [deploy]
-    env:
-      APP_URL: ${{ needs.deploy.outputs.APP_URL }}
+    # if: ${{ github.event.inputs.devsecops_action == 'dast' }}
+    needs: deploy
+    # env:
+    #   APP_URL: ${{ needs.deploy.outputs.APP_URL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
+
+      - name: echo URL
+        run: echo ${{ needs.deploy.outputs.APP_URL }}
 
       - name: Run OWASP ZAP DAST Scan
         continue-on-error: true

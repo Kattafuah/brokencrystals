@@ -121,12 +121,15 @@ jobs:
           # Set directory permissions
           chmod 777 -R zap-output/
           
-           # Use the APP_URL environment variable set in the deploy job
+          # Normalize APP_URL to start with "http://" if not specified, replacing any existing protocol
+          if [[ ! "$APP_URL" =~ ^http[s]?:// ]]; then
+            APP_URL="http://$APP_URL"
+          fi
+          
           echo "Running OWASP ZAP scan on URL: $APP_URL"
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
-          -t "${APP_URL/#http[s]*:\/\//http://}" \
+          -t "$APP_URL" \
           -r zap-report.html || true
-
 
       - name: List output directory contents
         run: |
@@ -136,16 +139,15 @@ jobs:
       - name: Check ZAP container logs
         run: |
           docker logs $(docker ps -lq) || true
-            
-
-      - name: Display ZAP Report (Optional)
+          
+      - name: Display ZAP Report 
         if: ${{ always() }}
         run: |
           if [ -f zap-output/zap-report.html ]; then
-          echo "ZAP report generated successfully. Displaying a preview:"
-          cat zap-output/zap-report.html | head -n 50
+            echo "ZAP report generated successfully. Displaying a preview:"
+            cat zap-output/zap-report.html | head -n 50
           else
-          echo "ZAP report not generated."
+            echo "ZAP report not generated."
           fi
 
       - name: Upload ZAP Report (Optional)
@@ -154,4 +156,3 @@ jobs:
         with:
           name: zap-report
           path: zap-output/*.html
-

@@ -14,7 +14,7 @@ on:
 
 permissions:
   checks: write
-  # contents: write
+  contents: write
  
 
 jobs:

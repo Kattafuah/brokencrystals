@@ -99,7 +99,7 @@ jobs:
           echo "Application URL is: $APP_URL"
 
           # Set the URL as an output to be used in the next job
-          echo "APP_URL=$APP_URL" >> $GITHUB_ENV
+          echo "APP_URL=$APP_URL" >> $GITHUB_OUTPUT
           
 
 

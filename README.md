@@ -1,22 +1,5 @@
 # CSN DevSecOps Capstone Project 
 
-A demo application "brokencrystals" is used for this capstone project. BrokenCrystals is a benchmark application that simulates a vulnerable environment. The repo ```https://github.com/NeuraLegion/brokencrystals``` was cloned and necessary modifications made to execute and meet the project requirements and deliverables. 
-
-Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accesed via this link ``` <provide link> ```
-
-## Objective
-To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to automate the build, test, and deployment processes, incorporating security best practices throughout the development lifecycle.
-
-## Key Requirements
-**1.** Static Code Analysis: Integrate a Static Application Security Testing (SAST) tool (such as SonarQube or Snyk) into the pipeline to analyze code for vulnerabilities.
-
-**2.** Secrets Management: Utilize a secrets management tool (like HashiCorp Vault or AWS Secrets Manager) to securely manage sensitive information and credentials.
-
-**3.** Docker Image: Build and push the Docker image to any selected Docker registry (such as Amazon ECR or Docker Hub) following security best practices. Configure image scanning for the deployed Docker images to detect vulnerabilities.
-
-**4.** Deployment: Deploy the application to a Kubernetes cluster provisioned with Minikube or Kind. Use port forwarding to ensure that the application is publicly accessible.
-
-**5.** Dynamic Application Security Testing (DAST): Implement DAST tools (such as OWASP ZAP) into the pipeline to test for vulnerabilities after deployment.
 
 
 ## Static Code Analysis (SAST) - Creating a Jenkins Pipeline for SonarQube Scanning
@@ -213,7 +196,7 @@ You can automate the the build trigger by using a GitHub webhook:
 Now the pipeline will trigger automatically once there is a push to the repository on branch "stable".
 
 ## Image scanning for deployed Docker images on Dockerhub
-Docker Scout on DockerHub can provide valuable image security insights by automatically scanning images that have been built, tagged, and pushed, revealing the impact of new CVEs on those images. In this project, this process can be initiated through a manual trigger of the .github/workflows/csn-devsecops-wf.yml file in this repository. This workflow offers three trigger options: btpscani, deploy, and dast. The btpscani trigger handles the build, tag, push, and scan of Docker images. The deploy trigger is responsible for deploying the application to your Kubernetes cluster, while the dast trigger runs OWASP ZAP to identify vulnerabilities post-deployment.
+Docker Scout on DockerHub can provide valuable image security insights by automatically scanning images that have been built, tagged, and pushed, revealing the impact of new CVEs on those images. In this project, this process can be initiated through a manual trigger of the `.github/workflows/csn-devsecops-wf.yml` file in this repository. This workflow offers three trigger options: btpscani, deploy, and dast. The btpscani (abreviation for build, tag, push, scan and image) trigger handles the build, tag, push, and scan of Docker images. The deploy trigger is responsible for deploying the application to your Kubernetes cluster, while the dast trigger runs OWASP ZAP to identify vulnerabilities post-deployment.
 
 Pre-requisites: 
 * Dockerhub account
@@ -239,266 +222,81 @@ This process builds, tags, and pushes your images to your Docker Hub account, al
 ![alt text](imagescan2_after_btpscanitrigger.png)
 ![alt text](imagescan_after_btpscanitrigger-1.png)
 
-## Deployment to AWS EKS
-After completing a SAST scan, if you are satisfied with the security analysis or have resolved any identified vulnerabilities, including those flagged by Docker Scout, you can proceed to deploy the pushed images. Ensuring that all SAST and Docker Scout issues have been addressed helps maintain a secure and robust deployment.
+## Deployment to AWS EKS Integrated with AWS Secrets Manager 
 
-Pre-requisites:
+
+### Creating AWS EKS cluster and associated resources
+
+To integrate AWS Secrets Manager with Amazon EKS, follow these steps:
+
+Prerequisites:
 
 AWS Account
-AWS EKS Cluster and NodeGroup
+kubectl utility
+eksctl utility *(To install kubectl & eksctl utilities, check [here](https://docs.aws.amazon.com/eks/latest/userguide/setting-up.html))*
+Helm *(To install Helm, check [here](https://docs.aws.amazon.com/eks/latest/userguide/helm.html))*
 
-Follow the steps below to create an AWS Cluster:
+Steps: 
+1. To create an EKS cluster with an OIDC provider provisioned, run:
 
-### Setting up an EKS Cluster using AWS CLI
+```eksctl create cluster -f ./eks-manifest-files/cluster.yaml```
 
-1.  #### Install and Configure the AWS CLI
-Ensure that you have the AWS CLI installed and configured with the necessary access credentials and default region. If not already done, you can configure it by running:
+**NB:** 
+The `./eks-manifest-files/cluster.yaml` manifest file is a configuration file for `eksctl`, a CLI tool for creating and managing Amazon EKS clusters. It specifies details for deploying an EKS cluster using AWS CloudFormation under the hood, which provisions and manages the necessary AWS resources for the cluster. Remember to: 
+* Change the `name` and `region` values to your desired cluster name and AWS region.
+* Modify the `nodeGroups` configuration (such as `instanceType` and `desiredCapacity`) to suit your application’s requirements.
 
-```aws configure```
+2. Install the Secrets Store CSI Driver by executing:
 
-2. #### Create an IAM Role for EKS
-Create an IAM role that EKS can assume to create AWS resources for Kubernetes. You need this role to allow EKS service to manage resources on your behalf.
-
-Create a file called trust.json in your working directory on your local machine with the following policy:
 ```
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "eks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
+helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
+helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace kube-system --set syncSecret.enabled=true
 ```
-##### Run the following command to create the role:
 
-```aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://trust.json```
+3. Install AWS Secrets and Config Provider (ASCP) by executing:
 
-##### Attach the EKS service policy to the role:
-```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy```
+```kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml```
 
-```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy```
-
- ***```aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite```
-
-3. #### Create the EKS Cluster
-You can create the cluster using the following command. Replace ``<ClusterName>``, ``<RoleARN>``, and other placeholders with your specific values.
-
-```aws eks create-cluster --name <ClusterName> --role-arn <RoleARN> --resources-vpc-config subnetIds=<Subnet1,Subnet2>,securityGroupIds=<SecurityGroupId>```
-
-- ``<RoleARN>`` is the ARN of the role you created above. 
-- ``<Subnet1,Subnet2>`` copy the ID of the subnets you want to deploy into. Always use a private subnet when available to make your cluster publicly inaccessible. 
-- ``<SecurityGroupId>`` use an existing securitygroup ID with the necessary permissions. 
-
-e.g. ```aws eks create-cluster --region us-east-1 --name cloudsec_cluster --role-arn arn:aws:iam::893475754589:role/eksServiceRole  --resources-vpc-config subnetIds=subnet-09cd5f7346f0f4567,subnet-00ca6185b0d2365a6,securityGroupIds=sg-0afbe148f8cdd7dqr```
-
-4. #### Create a Node Group
-Before creating a node group, you need an IAM role for the EKS worker nodes. Create a similar trust policy for the worker nodes and attach the necessary IAM policies (AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly).
-
-  4a. Create the Trust Relationship Policy Document
-
-Save the following policy to a file named eks-nodegroup-trust-policy.json. This policy allows EC2 and EKS services to assume the role.
+4. Create secret inside AWS Secrets Manager:
 ```
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": [
-          "ec2.amazonaws.com",
-          "eks.amazonaws.com"
-        ]
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
+#Export Region and Cluster Name
+REGION=us-east-1
+CLUSTERNAME=csn-capstone
+
+#Create Secret
+SECRET_ARN=$(aws --query ARN --output text secretsmanager  create-secret --name dbcredentials --secret-string '{"dbusername":"dev", "dbpassword":"SecOps"}' --region "$REGION")
 ```
-  4b. Create the Role
-
-Use the AWS CLI to create a new role with this trust relationship.
-
-```aws iam create-role --role-name MyCustomEKSNodeGroupRole --assume-role-policy-document file://eks-nodegroup-trust-policy.json```
-
-  4c. Attach Policies
-
-Attach the necessary policies to the role. These typically include AmazonEKSWorkerNodePolicy, AmazonEKS_CNI_Policy, AmazonEC2ContainerRegistryReadOnly, and any other policies specific to your deployment.
-
-```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy```
-
-```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy```
-
-```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly```
-
- ```aws iam attach-role-policy --role-name MyCustomEKSNodeGroupRole --policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite```
-
-  4d. Use the Custom Role in Your EKS Node Group Creation
-
-Use the ARN of this newly created custom role when creating your node group:
-
-```aws eks create-nodegroup --cluster-name <ClusterName> --nodegroup-name <NodeGroupName> --node-role arn:aws:iam::<YourAWSAccountNumber>:role/MyCustomEKSNodeGroupRole --subnets subnet-0b79cd63eecbc37ac subnet-0dda94c84b32365c3 subnet-0eeece074b0deb2b7 subnet-09a7a0d4db4d6a305 --instance-types t2.medium --scaling-config minSize=3,maxSize=5,desiredSize=3```
-
-e.g. ```aws eks create-nodegroup --region us-east-1 --cluster-name cloudsec_cluster --nodegroup-name brokencrystals_node --node-role arn:aws:iam::893475754589:role/MyCustomEKSNodeGroupRole --subnets subnet-09cd5f7346f0f4567 subnet-00ca6185b0d2365a6 --instance-types t2.medium --scaling-config minSize=3,maxSize=5,desiredSize=3```
-
-**_Make sure your cluster is created before executing the command to create a node group._**
-
-  4e. Update ``'kubeconfig'``
-
-To manage your cluster with `kubectl`, update your kubeconfig file by using on your terminal:
-
-```aws eks update-kubeconfig --region <your-region> --name <cluster-name>```
-
-## Secret Management using AWS Secrets Manager
-
-To store and manage database passwords (and other sensitive data) using AWS Secrets Manager, you can follow these steps. Secrets Manager provides a secure and convenient way to store, retrieve, and rotate secrets like database credentials. Here's how to integrate it:
-
-  1. Create a Secret in AWS Secrets Manager
- 
-* Navigate to AWS Secrets Manager:
-
-    * Go to the AWS Management Console.
-    * Select Secrets Manager from the services menu.
-* Store a New Secret:
-
-    * Click Store a new secret.
-    * Choose **Other type of secret** (or select Credentials for RDS database if applicable).
-    * In the key-value pairs section, enter your sensitive data (e.g., `username`, `password`).
-  * Example:
+5. Create IAM policy via:
 ```
-Key: DATABASE_USER
-Value: <your-db-user>
-
-Key: DATA_PASSWORD
-Value: <your-db-password>
+POLICY_ARN=$(aws --region "$REGION" --query Policy.Arn --output text iam create-policy --policy-name csn-capstone-iam-policy --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [ {
+        "Effect": "Allow",
+        "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+        "Resource": ["$SECRET_ARN"]
+    } ]
+}')
 ```
-    * Click **Next** and provide a **Secret name** (e.g., `csn/bc/postgresql`).
-    * Configure access permissions (IAM policies) and complete the secret creation.
+**NB:** 
+Before running the code to create the IAM policy, ensure you provide the value for `SECRET_ARN`, which corresponds to the ARN of the AWS Secrets Manager secret you want to access. This ensures that the created policy correctly specifies which secret can be accessed. Replace `$SECRET_ARN` with your actual secret ARN to avoid errors during policy creation. Also name the policy accordingly. 
 
-  2. Ensure the Secrets Store CSI Driver is Installed
+6. Create a Service Account using: 
 
-The `SecretProviderClass` resource is part of the Kubernetes Secrets Store CSI Driver, which allows your pods to access external secrets (e.g., from AWS Secrets Manager).
-  
-  * Installing the Secrets Store CSI Driver you install the driver using Helm (assuming you have Helm installed):
-  ```
-  helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
-  helm repo update
-  helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace kube-system
-  ```
-  * Verify the driver is running and the SecretProviderClass is created:
-  ```
-  kubectl get pods -n kube-system
-  or 
-  kubectl get secretproviderclass -n kube-system
-  ```
-  You should see pods related to csi-secrets-store running successfully.
-  
-  * Check for CRDs (Custom Resource Definitions) by verifying that the `SecretProviderClass` exists in your cluster by running:
-  
-  ```kubectl get crd```
-   
-   Ensure that you see something like `secretproviderclasses.secrets-store.csi.x-k8s.io` in the output. If it is missing, the driver installation may have failed or needs to be retried.
-  * Install the AWS Provider Plugin for the Secrets Store CSI Driver: 
+```eksctl create iamserviceaccount --name csn-capstone-service-account --region="$REGION" --cluster "$CLUSTERNAME" --attach-policy-arn "$POLICY_ARN" --approve --override-existing-serviceaccounts```
 
-  ```kubectl apply -f https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml``` 
-  * Verify the AWS Provider Plugin is installed by checking the pods in the `kube-system` namespace
-  * Make sure you are applying resources in the correct namespace. If your resources are in a specific namespace, ensure that the `SecretProviderClass` resource is also created in that namespace. You can specify it explicitly:
-  ```
-  apiVersion: secrets-store.csi.x-k8s.io/v1
-  kind: SecretProviderClass
-  metadata:
-    name: aws-secrets
-    namespace: your-namespace
-  spec:
-    ...
-  ```
-  3. Ensure the OIDC Provider is Configured in AWS
-    * Check if the OIDC provider exists for your EKS cluster by going to the IAM Console in AWS:
+The service account will be linked to the IAM policy created in the previous step. This is known as IAM Role for Service Account (IRSA). Be sure to provide the POLICY_ARN of the policy created in step 5 in the code. Also, name the service account appropriately for your application. 
 
-      - Navigate to the *IAM* dashboard.
-      - Select *Identity Providers*.
-      - Ensure that there's a provider for `oidc.eks.us-east-1.amazonaws.com/id/<eks-cluster-id>`. 
-      
-      If the OIDC provider doesn't exist, create it manually using the following command:
+7. Create AWS Secret Provider Class by running:
 
-      ```aws eks --region us-east-1 update-kubeconfig --name <your-cluster-name>```
-    * Again, in the AWS Management Console:
+```kubectl apply -f ./eks-manifest-files/csn-capstone-secret-provider.yaml```
 
-      - Navigate to EKS.
-      - Select your cluster.
-      - In the *Details* section on the *Overview* tab, note the value of the *OpenID Connect provider URL*.
-    * Navigate back to the *IAM* dashboard. 
-      - Select *Identity Providers*.
-      - Click on *Add provider*.
-      - Select *OpenID Connect* as the provider type.
-      - Enter/paste the *URL* of your OIDC provider (the one you copied earlier).
-      - Enter `sts.amazonaws.com` for *Audience*.
-      - Click *Add provider*.
+This `csn-capstone-secret-provider.yaml` manifest file defines a `SecretProviderClass` resource, which is used by the Secrets Store CSI driver to retrieve secrets from AWS Secrets Manager and inject them into Kubernetes pods. The `SecretProviderClass` configuration specifies how the secrets should be accessed and mounted in the pod.
 
-  4. Create a SecretProviderClass Resource
-
-    * Add the SecretProviderClass Resource: Ensure you create a SecretProviderClass in your manifest:
-    ```
-    apiVersion: secrets-store.csi.x-k8s.io/v1
-    kind: SecretProviderClass
-    metadata:
-      name: aws-secrets
-      namespace: your-namespace
-    spec:
-      provider: aws
-      parameters:
-        objects: |
-          - objectName: csn/bc/postgresql
-            objectType: secretsmanager # Specify the type (e.g., secretsmanager or ssmparameter)
-      ```
-    Make sure to replace `your-namespace` with the appropriate namespace, and keep the secret name `csn/bc/postgresql` consistent throughout your configurations.
+**NB:**
+* Change the `metadata` details (like `name` and `namespace`) to match your preferences.
+* Ensure the `objects` section matches the ARN and version of the secret you created in step 4.
 
 
-## Deploying to the EKS Environment
-
-Prerequisites
-* An AWS EKS cluster with a ready Cluster and Node Group.
-* Necessary AWS IAM permissions to configure deployments.
-* Configured AWS secrets in your GitHub repository.
-* Docker images built and tagged, and available in your container registry.
-
-### Deployment Steps Using GitHub Actions
-Follow these steps to deploy the application to your AWS EKS cluster using the ```csn-devsecops-wf.yml``` GitHub Actions workflow.
-
-1. #### Configure Repository Secrets
-* Ensure that ```AWS_ACCESS_KEY_ID``` and ```AWS_SECRET_ACCESS_KEY``` are configured as secrets in your GitHub repository to allow access to AWS services.
-
-2. #### Update the AWS EKS Cluster Name
-* Open the ```csn-devsecops-wf.yml``` workflow file and navigate to line 82.
-* Replace ``"cloudsec_cluster"`` with the name of your EKS cluster.
-
-3. #### Navigate to the GitHub Actions Tab
-* Go to your GitHub repository and click on the "Actions" tab in the top menu.
-
-4. #### Select the ``csn-devsecops-wf`` Workflow
-* Choose ```csn-devsecops-wf``` from the list on the left sidebar.
-
-5. #### Trigger the Deployment Workflow
-
-* Click the "Run workflow" button on the GitHub Actions page.
-* In the pop-up that appears, ensure that "deploy" is selected as the action to be performed.
-* Click "Run workflow" to start the deployment process.
-
-6. #### Monitor the Workflow Execution
-* The workflow logs can be monitored to track the progress of your deployment and ensure there are no issues during the execution.
-
-### Kubernetes Manifest Reference
-The deployment makes use of a Kubernetes manifest file located at ```./k8s/app.yml```. This file defines various resources required for the application, such as ConfigMaps, Services, and Deployments. Ensure any environment-specific configurations are adjusted as needed before deploying.
- 
-
-
-
-
-AWS Secrets Manager.
 
 
 ## Description

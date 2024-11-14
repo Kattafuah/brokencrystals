@@ -79,39 +79,32 @@ jobs:
         uses: azure/setup-kubectl@v1
 
       - name: Load AWS EKS credentials
-        run: aws eks update-kubeconfig --name cloudsec_cluster --region us-east-1 # Change to your cluster name
+        run: aws eks update-kubeconfig --name csn_capstone --region us-east-1 # Change to your cluster name
 
       - name: Update Deployment Image
         run: |
-          sed -i "s/VERSION_TAG/${{ github.sha }}/g" ./k8s/app.yaml
+          sed -i "s/VERSION_TAG/${{ github.sha }}/g" ./eks-manifest-files/app.yaml
 
       - name: Deploy to EKS
-        run: kubectl apply -f k8s/ --validate=false # Path to your Kubernetes config files
+        run: kubectl apply -f ./eks-manifest-files/app.yaml --validate=false # Path to your Kubernetes config files
 
       - name: Verify deployment and check application health
         run: |          
-          kubectl rollout status deployment/nodejs-deployment --timeout=5m || { echo 'Deployment Verification failed'; exit 1; } # Verify the deployment rollout status
+          kubectl rollout status deployment/nodejs-deployment --timeout=5m || { echo 'Deployment Verification failed'; exit 1; }
 
-          # Wait for the pods to be running and ready
           kubectl wait --for=condition=ready pod -l app=nodejs-deployment --timeout=5m || { echo 'Pod readiness check failed'; exit 1; }
 
-          # Optional: Perform a simple health check by hitting the application's endpoint
-          # Replace <your-app-url> with the actual URL for your application
-          curl --fail --silent --show-error http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/health || { echo 'Health check failed'; exit 1; }
+          # Fetch the application URL from the ingress or service
+          APP_URL=$(kubectl get svc nodejs-deployment -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "Application URL is: $APP_URL"
 
-  # dast:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.event.inputs.devsecops_action == 'dast' }}
-  #   steps:
-  #     - name: OWASP ZAP DAST Scan
-  #       continue-on-error: true
-  #       run: |
-  #         docker run --rm -v $(pwd):/zap/wrk:rw zaproxy/zap-stable zap-baseline.py -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' -r /zap/wrk/zap-report.html || true
-  #         ls -la /zap/wrk
+          # Set the URL as an output to be used in the next job
+          echo "APP_URL=$APP_URL" >> $GITHUB_ENV
 
   dast:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'dast' }}
+    needs: deploy
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -128,10 +121,10 @@ jobs:
           # Set directory permissions
           chmod 777 -R zap-output/
           
-          # Run OWASP ZAP scan, mounting the zap-output directory
-          echo "Running OWASP ZAP DAST scan..."
+           # Use the APP_URL environment variable set in the deploy job
+          echo "Running OWASP ZAP scan on URL: $APP_URL"
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
-          -t 'http://a685e09027a3441d095bc79dc10974e6-1283867940.us-east-1.elb.amazonaws.com/' \
+          -t "$APP_URL" \
           -r zap-report.html || true
 
       - name: List output directory contents

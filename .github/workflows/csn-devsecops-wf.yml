@@ -109,8 +109,8 @@ jobs:
 
   dast:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.devsecops_action == 'dast' }}
-    needs: deploy
+    #if: ${{ github.event.inputs.devsecops_action == 'dast' }}
+    needs: [deploy]
     env:
       APP_URL: ${{ needs.deploy.outputs.APP_URL }}
     steps:

@@ -124,8 +124,9 @@ jobs:
            # Use the APP_URL environment variable set in the deploy job
           echo "Running OWASP ZAP scan on URL: $APP_URL"
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
-          -t "$APP_URL" \
+          -t "${APP_URL/#http[s]*:\/\//http://}" \
           -r zap-report.html || true
+
 
       - name: List output directory contents
         run: |

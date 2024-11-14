@@ -64,6 +64,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    outputs:
+      APP_URL: ${{ steps.set-url.outputs.APP_URL }}
     #needs: btpscani  # Ensure that deploy job depends on successful completion of btpscani job
     if: ${{ github.event.inputs.devsecops_action == 'deploy' }}
     steps:
@@ -97,18 +99,20 @@ jobs:
           kubectl wait --for=condition=ready pod -l app=nodejs --timeout=5m || { echo 'Pod readiness check failed'; exit 1; }
 
           # Fetch the application URL from the ingress or service
-          APP_URL=$(kubectl get svc nodejs-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "Application URL is: $APP_URL"
+          app_url=$(kubectl get svc nodejs-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "Application URL is: $app_url"
 
-          # Set the URL as an output to be used in the next job
-          echo "{APP_URL}={$APP_URL}" >> $GITHUB_OUTPUT
+      - name: Set URL as output to be used in next job
+        id: set-url
+        run: echo "{APP_URL}={$app_url}" >> $GITHUB_OUTPUT
           
-
 
   dast:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'dast' }}
-    # needs: deploy
+    needs: deploy
+    env:
+      APP_URL: ${{ needs.deploy.outputs.APP_URL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3

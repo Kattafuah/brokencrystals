@@ -104,15 +104,15 @@ jobs:
 
       - name: Set URL as output to be used in next job
         id: set-url
-        run: echo "{APP_URL}={$app_url}" >> $GITHUB_OUTPUT
+        run: echo "APP_URL=$app_url" >> $GITHUB_OUTPUT
           
 
   dast:
     runs-on: ubuntu-latest
     # if: ${{ github.event.inputs.devsecops_action == 'dast' }}
     needs: deploy
-    # env:
-    #   APP_URL: ${{ needs.deploy.outputs.APP_URL }}
+    env:
+      APP_URL: ${{ needs.deploy.outputs.APP_URL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3

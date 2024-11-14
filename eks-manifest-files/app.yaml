@@ -50,7 +50,6 @@ data:
     CREATE INDEX IF NOT EXISTS "IDX_users_email" ON "user" ("email");
 
 ---
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -99,7 +98,7 @@ spec:
               secretProviderClass: "bc-db-credentials"
       containers:
         - name: db
-          image: kattafuah/brokencrystals:postgres-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881
+          image: kattafuah/brokencrystals:postgres-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881
           env:
             - name: POSTGRES_DB
               value: "bc"
@@ -150,7 +149,7 @@ spec:
     spec:
       containers:
         - name: nodejs
-          image: kattafuah/brokencrystals:nodejs-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:nodejs-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
           envFrom:
             - configMapRef:
                 name: app-config
@@ -218,7 +217,7 @@ spec:
     spec:
       containers:
         - name: mailcatcher
-          image: kattafuah/brokencrystals:mailcatcher-a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:mailcatcher-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
           ports:
             - containerPort: 1080
             - containerPort: 1025

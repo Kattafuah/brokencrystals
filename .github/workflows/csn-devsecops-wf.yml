@@ -104,7 +104,7 @@ jobs:
   dast:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'dast' }}
-    needs: deploy
+    # needs: deploy
     steps:
       - name: Check out repository
         uses: actions/checkout@v3

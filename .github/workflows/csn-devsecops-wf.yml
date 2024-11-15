@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'deploy' }}
     outputs:
-      APP_URL: ${{ steps.seturl.outputs.APP_URL }}
+      APP-URL: ${{ steps.seturl.outputs.APP-URL }}
     #needs: btpscani  # Ensure that deploy job depends on successful completion of btpscani job
     steps:
       - name: Checkout code
@@ -101,12 +101,12 @@ jobs:
           kubectl wait --for=condition=ready pod -l app=nodejs --timeout=5m || { echo 'Pod readiness check failed'; exit 1; }
 
           # Fetch the application URL from the ingress or service
-          app_url=$(kubectl get svc nodejs-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "Application URL is: $app_url"
+          app-url=$(kubectl get svc nodejs-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "Application URL is: $app-url"
 
       - name: Set URL as output to be used in next job
         id: seturl
-        run: echo "APP_URL=$app_url" >> $GITHUB_OUTPUT
+        run: echo "APP-URL=$app-url" >> $GITHUB_OUTPUT
           
 
   dast:
@@ -114,14 +114,15 @@ jobs:
     # if: ${{ github.event.inputs.devsecops_action == 'dast' }}
     needs: deploy
     env:
-      APP_URL: ${{ 'needs.deploy.outputs.APP_URL' }}
+      APP-URL: ${{ 'needs.deploy.outputs.APP-URL' }}
     steps:
 
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Echo APP_URL
-        run: echo $APP_URL
+      - name: Echo APP-URL
+        run: |
+          echo $APP-URL
         
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
@@ -135,16 +136,16 @@ jobs:
           # Set directory permissions
           chmod 777 -R zap-output/
           
-          # Normalize APP_URL to start with "http://" if not specified, replacing any existing protocol
-          if [[ ! "$APP_URL" =~ ^http[s]?:// ]]; then
-            APP_URL="http://$APP_URL"
+          # Normalize APP-URL to start with "http://" if not specified, replacing any existing protocol
+          if [[ ! "$APP-URL" =~ ^http[s]?:// ]]; then
+            APP-URL="http://$APP-URL"
           fi
-          echo "Normalized APP_URL: $APP_URL"
+          echo "Normalized APP-URL: $APP-URL"
 
-          echo "Running OWASP ZAP scan on URL: $APP_URL"
+          echo "Running OWASP ZAP scan on URL: $APP-URL"
 
           docker run --rm -v "$(pwd)/zap-output:/zap/wrk" zaproxy/zap-stable zap-baseline.py \
-          -t "$APP_URL" \
+          -t "$APP-URL" \
           -r zap-report.html || true
 
       - name: List output directory contents

@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.devsecops_action == 'deploy' }}
     outputs:
-      URL: ${{ steps.seturl.outputs.URL }}
+      URL: ${{ steps.verify_deployment.outputs.URL }}
     #needs: btpscani  # Ensure that deploy job depends on successful completion of btpscani job
     steps:
       - name: Checkout code
@@ -95,6 +95,7 @@ jobs:
         run: kubectl apply -f ./eks-manifest-files/app.yaml --validate=false # Path to your Kubernetes config files
 
       - name: Verify deployment and check application health
+        id: verify_deployment
         run: |          
           kubectl rollout status deployment/nodejs-deployment --timeout=5m || { echo 'Deployment Verification failed'; exit 1; }
 
@@ -104,9 +105,8 @@ jobs:
           appurl=$(kubectl get svc nodejs-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
           echo "Application URL is: $appurl"
 
-      - name: Set URL as output to be used in next job
-        id: seturl
-        run: echo "URL=$appurl" >> $GITHUB_OUTPUT
+          # Set the appurl variable as output
+          echo "URL=$appurl" >> $GITHUB_OUTPUT
           
 
   dast:

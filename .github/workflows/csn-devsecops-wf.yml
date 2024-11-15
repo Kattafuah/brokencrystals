@@ -85,14 +85,14 @@ jobs:
         uses: azure/setup-kubectl@v1
 
       - name: Load AWS EKS credentials
-        run: aws eks update-kubeconfig --name csn-capstone --region us-east-1 # Change to your cluster name
+        run: aws eks update-kubeconfig --name csn-capstone --region us-east-1 # Change to your cluster name & region
 
       - name: Update Deployment Image
         run: |
           sed -i "s/VERSION_TAG/${{ github.sha }}/g" ./eks-manifest-files/app.yaml
 
       - name: Deploy to EKS
-        run: kubectl apply -f ./eks-manifest-files/app.yaml --validate=false # Path to your Kubernetes config files
+        run: kubectl apply -f ./eks-manifest-files/app.yaml --validate=false # Path to your Kubernetes application manifest file/s
 
       - name: Verify deployment and check application health
         id: verify_deployment

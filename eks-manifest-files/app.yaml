@@ -98,7 +98,7 @@ spec:
               secretProviderClass: "bc-db-credentials"
       containers:
         - name: db
-          image: kattafuah/brokencrystals:postgres-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881
+          image: kattafuah/brokencrystals:postgres-VERSION_TAG 
           env:
             - name: POSTGRES_DB
               value: "bc"
@@ -149,7 +149,7 @@ spec:
     spec:
       containers:
         - name: nodejs
-          image: kattafuah/brokencrystals:nodejs-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:nodejs-VERSION_TAG 
           envFrom:
             - configMapRef:
                 name: app-config
@@ -189,11 +189,11 @@ spec:
   selector:
     app: mailcatcher
   ports:
-    - name: http  # Added name for this port
+    - name: http  
       protocol: TCP
       port: 1080
       targetPort: 1080
-    - name: smtp  # Added name for this port
+    - name: smtp  
       protocol: TCP
       port: 1025
       targetPort: 1025
@@ -217,7 +217,7 @@ spec:
     spec:
       containers:
         - name: mailcatcher
-          image: kattafuah/brokencrystals:mailcatcher-VERSION_TAG #a5c6ea1e5c9eeca5b0fd7e9e98806ea32cdee881 #VERSION_TAG #-abff3fc1607066afcdaf4ea931d6a2b68709a748
+          image: kattafuah/brokencrystals:mailcatcher-VERSION_TAG 
           ports:
             - containerPort: 1080
             - containerPort: 1025

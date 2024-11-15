@@ -1,7 +1,7 @@
 # CSN DevSecOps Capstone Project 
 A demo application "brokencrystals" is used for this capstone project. BrokenCrystals is a benchmark application that simulates a vulnerable environment. The repo ```https://github.com/NeuraLegion/brokencrystals``` was cloned and necessary modifications made to execute and meet the project requirements and deliverables. 
 
-Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accessed [here](#https://github.com/NeuraLegion/brokencrystals)
+Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accessed [Broken Crystals Repository](https://github.com/NeuraLegion/brokencrystals)
 
 ## Objective
 To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to automate the build, test, and deployment processes, incorporating security best practices throughout the development lifecycle.

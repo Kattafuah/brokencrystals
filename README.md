@@ -1,7 +1,7 @@
 # CSN DevSecOps Capstone Project 
 A demo application "brokencrystals" is used for this capstone project. BrokenCrystals is a benchmark application that simulates a vulnerable environment. The repo ```https://github.com/NeuraLegion/brokencrystals``` was cloned and necessary modifications made to execute and meet the project requirements and deliverables. 
 
-Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accessed [Broken Crystals Repository](https://github.com/NeuraLegion/brokencrystals)
+Details on the description of the benchmark Broken Crystals application alongside how to build & run the application and the vulnerabilities overview can be accessed here [Broken Crystals Repository](https://github.com/NeuraLegion/brokencrystals)
 
 ## Objective
 To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to automate the build, test, and deployment processes, incorporating security best practices throughout the development lifecycle.
@@ -17,6 +17,8 @@ To implement a secure CI/CD pipeline using either Jenkins or GitHub Actions to a
 
 **5.** Dynamic Application Security Testing (DAST): Implement DAST tools (such as OWASP ZAP) into the pipeline to test for vulnerabilities after deployment. For more information, click [here](#running-the-owasp-zap-dast-scan-via-github-actions-workflow)
 
+
+## Deliverables:
 ## Static Code Analysis (SAST) - Creating a Jenkins Pipeline for SonarQube Scanning
 
 **1.** Provision an amazon linux t2.large ec2 instance and assign ssm role. Ensure your instance security group has the necessary inbound rules to allow for access via ports 9090, 9000 etc.

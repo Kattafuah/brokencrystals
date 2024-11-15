@@ -114,7 +114,7 @@ jobs:
     # if: ${{ github.event.inputs.devsecops_action == 'dast' }}
     needs: deploy
     env:
-      APP_URL: ${{ needs.deploy.outputs.APP_URL }}
+      APP_URL: $GITHUB_OUTPUT
     steps:
 
       - name: Check out repository

@@ -11,14 +11,11 @@ on:
           - deploy
           - dast
         required: true
-
     
-
 permissions:
   checks: write
   contents: write
  
-
 jobs:
   btpscani:
     runs-on: ubuntu-latest

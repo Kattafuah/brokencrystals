@@ -209,7 +209,7 @@ You can automate the the build trigger by using a GitHub webhook:
 Now the pipeline will trigger automatically once there is a push to the repository on branch "stable".
 
 ## Image scanning for deployed Docker images on Dockerhub
-Docker Scout on DockerHub can provide valuable image security insights by automatically scanning images that have been built, tagged, and pushed, revealing the impact of new CVEs on those images. In this project, this process can be initiated through a manual trigger of the `.github/workflows/csn-devsecops-wf.yml` file in this repository. This workflow offers three trigger options: btpscani, deploy, and dast. The btpscani (abreviation for build, tag, push, scan and image) trigger handles the build, tag, push, and scan of Docker images. The deploy trigger is responsible for deploying the application to your Kubernetes cluster, while the dast trigger runs OWASP ZAP to identify vulnerabilities post-deployment.
+Docker Scout on DockerHub can provide valuable image security insights by automatically scanning images that have been built, tagged, and pushed, revealing the impact of new CVEs on those images. In this project, this process can be initiated through a manual trigger of the `.github/workflows/csn-devsecops-wf.yml` file in this repository. This workflow offers three trigger options: btpscani, deploy, and dast. The btpscani (abreviation for build, tag, push, scan and image) trigger handles the build, tag, push, and scan of Docker images. The deploy trigger is responsible for deploying the application to your Kubernetes cluster, while the dast job triggers automatically upon successful completion of the deploy job runnning OWASP ZAP to identify vulnerabilities post-deployment.
 
 Prerequisites: 
 * Dockerhub account
@@ -368,7 +368,7 @@ Follow these steps to deploy the application to your AWS EKS cluster using the `
 * Ensure that ```AWS_ACCESS_KEY_ID``` and ```AWS_SECRET_ACCESS_KEY``` are configured as secrets in your GitHub repository to allow access to AWS services.
 
 2. #### Update the AWS EKS Cluster Name
-* Open the ```csn-devsecops-wf.yml``` workflow file and navigate to line 82.
+* Open the ```csn-devsecops-wf.yml``` workflow file and navigate to line 85.
 * Replace ``csn_capstone`` with the name of your EKS cluster.
 
 3. #### Navigate to the GitHub Actions Tab
@@ -463,4 +463,15 @@ A screenshot of how this report looks like is shown below:
 
 The entire process, from deployment to DAST scanning, is automated and you can review the scan report and logs from the output directory to assess the security vulnerabilities detected by OWASP ZAP. The report downloaded from GitHub Actions `Artifacts` can be found in this repo in the zip repo called `zap-report.zip`.
 
+
+## Conclusion
+
+This project successfully demonstrates the implementation of a secure CI/CD pipeline for deploying the BrokenCrystals application using industry best practices in DevSecOps. By integrating static and dynamic code analysis, secrets management, Docker image building and vulnerability scanning, and secure Kubernetes deployment, it ensures robust security and reliability at every stage of the software delivery lifecycle. This approach highlights how automation and security can be seamlessly woven into modern cloud-native development workflows.
+
+
+## Acknowledgements
+
+I would like to extend my sincere gratitude to Emmanuel Okon ([LinkedIn](https://www.linkedin.com/in/okon-emma/)) and the entire team at [Cloud Security Network](https://cloudsecnetwork.com/) ([GitHub](https://github.com/cloudsecnetwork)) for providing invaluable training and project opportunities. Your guidance and expertise have been instrumental in shaping my DevSecOps journey.
+
+A special thanks to my peers [Gabriel Seyram Kofi](https://github.com/seyramgabriel), [Maurice Makafui](https://github.com/Maurice-Makafui), and [Michael Kedey](https://github.com/michaelkedey) for their collaborative spirit and dedication. Your teamwork, insights, and commitment to excellence have made this project both impactful and rewarding. Thank you all!
 
